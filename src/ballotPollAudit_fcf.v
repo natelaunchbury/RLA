@@ -1,5 +1,7 @@
+Add Rec LoadPath "fcf/src".
 Require Import QArith_base.
 Require Import ballotPollAudit.
+
 Require Import FCF.
 Require Import Crypto.
 Require Import Basics.
@@ -48,7 +50,7 @@ end.
 
 Definition is_loser_vote (o : option bool) :=
 match o with
-| Some true => true
+| Some false => true
 | _ => false
 end.
 
@@ -87,16 +89,20 @@ generalize dependent winners.
 revert o losers.
 induction votes; intros.
 - simpl in *. unfold sumList. simpl. 
-  dist_compute. subst. unfold tabulate in H0. unfold count in H0 at 1. simpl in H0. inversion H0.
-  unfold nat_to_rat. unfold eqRat. simpl. unfold beqRat.
-  simpl in *. auto.
-  destruct o eqn:?. 
-  + destruct b;  intuition. 
-    unfold tabulate, count in H0. simpl in *. inversion H0; auto.
-    unfold nat_to_rat. unfold eqRat. unfold beqRat. simpl. auto.
-  + subst. 
-    unfold tabulate, count in H0. simpl in *. inversion H0; auto.
-    unfold nat_to_rat. unfold eqRat. unfold beqRat. simpl. auto.
+  dist_compute.
+  + subst. unfold tabulate in H0. unfold count in H0 at 1.
+    simpl in H0. inversion H0.
+    unfold nat_to_rat.
+    reflexivity.  
+  + unfold tabulate, count in H0.
+    destruct o eqn:?. 
+     * destruct b;  intuition. 
+       simpl in *. inversion H0; auto.
+       unfold nat_to_rat. reflexivity. 
+     * subst. 
+       simpl in *. inversion H0; auto.
+       unfold nat_to_rat.
+       reflexivity.
 - simpl in *. rewrite sumList_app.  
   destruct a eqn:?.
   + 
