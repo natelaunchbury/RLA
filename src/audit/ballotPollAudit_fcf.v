@@ -414,7 +414,7 @@ Proof.
     rewrite Bernoulli_correct_complement.
      { repeat if_match_tac. 
         - simpl. dist_compute. rewrite plus_minus_1.
-      
+Admitted.      
     
 
 
@@ -476,12 +476,25 @@ Lemma gtb_gt_iff : forall a b, gtb a b = true <-> a > b.
 Proof.
 intros.
 split; intros;
-unfold gtb in *;
 destruct (nat_compare a b) eqn:?; intuition; 
 try rewrite <- nat_compare_gt in *; 
 try rewrite <- nat_compare_lt in *;
-try rewrite nat_compare_eq_iff in *; subst; try omega; auto.
-Admitted.
+try rewrite nat_compare_eq_iff in *; try omega; auto.
+ - unfold gtb in H. 
+   destruct (a?=b) eqn:?; try congruence. 
+   rewrite <- nat_compare_gt in Heqc0. 
+   omega.   
+ - unfold gtb in H. destruct (a?=b) eqn:?; try congruence. 
+   rewrite <- nat_compare_gt in Heqc0.
+   assumption. 
+ - unfold gtb. 
+   destruct (a?=b) eqn:?. 
+   + rewrite nat_compare_eq_iff in Heqc0. 
+     omega. 
+   + rewrite <- nat_compare_lt in Heqc0. 
+     omega. 
+   + reflexivity. 
+Qed. 
 
 Definition win_game (audit : list (option bool) -> Q -> Q -> Comp bool)
            (actual_votes : list nat) (reported_winner : nat)
