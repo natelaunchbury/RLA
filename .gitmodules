@@ -1,0 +1,3 @@
+[submodule "src/fcf"]
+	path = src/fcf
+	url = https://github.com/adampetcher/fcf.git
