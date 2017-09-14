@@ -144,13 +144,15 @@ intros. destruct votes. inversion H0.
 unfold get_random_ballot, get_random_ballot'.
 pose proof  RndNat_prob. 
 specialize (H1 (length (o :: votes))). 
-eapply eqRat_trans. SearchAbout RndNat. SearchAbout evalDist. Print Distribution.
-simpl. unfold evalDist. Print getSupport. Print getAllBvectors.
+eapply eqRat_trans.
+(*SearchAbout RndNat. SearchAbout evalDist. Print Distribution.*)
+simpl. unfold evalDist.
+(*Print getSupport. Print getAllBvectors.*)
 Compute (getAllBvectors 2).
-Print Bind.
+(*Print Bind.*)
 simpl.
-Check evalDist_seq_case_split_eq. 
-SearchAbout evalDist.
+(*Check evalDist_seq_case_split_eq. 
+SearchAbout evalDist.*)
 Admitted.
 
 
