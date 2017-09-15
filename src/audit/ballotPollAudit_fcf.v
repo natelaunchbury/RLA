@@ -140,15 +140,18 @@ tabulate votes = (winnervotes,loservotes ) ->
 nat_to_posnat_ (length votes) = Some totalvotes ->
 Pr[v <-$ (get_random_ballot votes); ret (is_winner_vote v)] ==
 RatIntro (winnervotes) (totalvotes). 
-intros. destruct votes. inversion H0.
+intros. destruct votes eqn:?. inversion H0.
 unfold get_random_ballot, get_random_ballot'.
 pose proof  RndNat_prob. 
 specialize (H1 (length (o :: votes))). 
 eapply eqRat_trans.
 (*SearchAbout RndNat. SearchAbout evalDist. Print Distribution.*)
-simpl. unfold evalDist.
+
+
+
+
 (*Print getSupport. Print getAllBvectors.*)
-Compute (getAllBvectors 2).
+(*Compute (getAllBvectors 2).*)
 (*Print Bind.*)
 simpl.
 (*Check evalDist_seq_case_split_eq. 
@@ -298,6 +301,7 @@ match goal with
    destruct m eqn:?
 end.
 
+(* What is this saying? Is it true? *)
 Lemma get_support_bernoulli_nz :
 forall n f,
 ~(n == 0)%rat ->
@@ -314,9 +318,9 @@ auto.
 assert (In false (getSupport (Bernoulli n))).
 apply H3. intro.
 rewrite Bernoulli_correct_complement in H5.
-apply ratSubtract_0_inv in H5. SearchAbout leRat.
+apply ratSubtract_0_inv in H5. 
 apply leRat_impl_eqRat in H5; auto. auto.
-destruct (getSupport (Bernoulli n)). inversion H4.
+destruct (getSupport (Bernoulli n)) eqn:?. inversion H4.
 destruct l. destruct b; simpl in *; intuition; try congruence. 
 simpl in *. destruct l. destruct b, b0; intuition; try congruence; auto.
 unfold sumList. simpl. repeat rewrite <- ratAdd_0_l.
@@ -385,10 +389,14 @@ Lemma n_bernoulli_binomial :
 forall N x R,
 Pr[ do_binomial x N R ] == binomial N x R.  
 Proof.
+
+
 intros.
 destruct N.
 destruct x0. omega.
+
 generalize dependent g.
+
 induction x0. intros. 
 unfold binomial. unfold choose. simpl fact.
 simpl ratPower.
@@ -538,7 +546,22 @@ Qed.
 Lemma evalDist_negb : forall (c : Comp bool) (a : bool),
     evalDist (x <-$ c; ret (negb x)) a == evalDist (x <-$ c; ret x) (negb a).
 Proof. 
-Admitted.
+  intros.
+
+  simpl. rewrite sumList_body_eq. 
+  instantiate (1:=(fun b:bool => evalDist c b *
+                    (if EqDec_dec bool_EqDec b (negb a) then 1 else 0))%rat).
+  reflexivity.
+  intros.
+  simpl.
+
+  destruct a0, a eqn:?.
+  dist_compute.
+  dist_compute.
+  dist_compute.
+  dist_compute.
+Qed.
+
 
 Lemma length_filter_true_bool :
 forall l,
@@ -744,8 +767,6 @@ Theorem evalDist_right_ident : forall (A : Set)(eqd : EqDec A)(c : Comp A) a,
   destruct (in_dec (EqDec_dec eqd) a (getSupport c)).
   simpl.
   eapply eqRat_trans.
-Locate sumList_exactly_one. 
-Check sumList_exactly_one.
   eapply sumList_exactly_one.
   eapply getSupport_NoDup.
   eauto.
@@ -793,6 +814,6 @@ Proof.
         symmetry in Heqb1.
         apply beq_nat_eq in Heqb1.
         subst. 
-        Check do_audit_inc.
+(*        Check do_audit_inc.*)
 Admitted.  
     
