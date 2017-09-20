@@ -243,7 +243,11 @@ if vote then
 else
   (((2 # 1) * (1 - winnerShare)) * T)%Q
 .
-(* Note: it has been proposed that this bound can be reduced
+
+(* UPDATE: back-of-the-napkin calculations has given evidence
+that the note below might not actually be valuable.
+
+ Note: it has been proposed that this bound can be reduced
  to the Chebyshev's inequality. Proving this first in FCF
  may be a good step forward. 
 
