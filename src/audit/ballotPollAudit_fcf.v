@@ -1,4 +1,4 @@
-Add Rec LoadPath "fcf/src/FCF".
+(*Add Rec LoadPath "fcf/src/FCF".*)
 Require Import QArith_base.
 Require Import ballotPollAudit.
 
@@ -7,6 +7,11 @@ Require Import Crypto.
 Require Import Basics.
 Require Import Bernoulli.
 
+(*
+  Implements a risk-limiting audit as described in 
+ "Ballot-polling Risk-limiting Audits to Verify Outcomes" 
+  https://www.usenix.org/system/files/conference/evtwote12/evtwote12-final27.pdf
+*)
 
 Definition is_some {A : Type} (o : option A) :=
 match o with
@@ -42,6 +47,7 @@ match votes with
 | _ => get_random_ballot' votes
 end.
 
+(* A None vote is considered invalid *)
 Definition is_winner_vote (o : option bool) :=
 match o with
 | Some true => true
@@ -237,6 +243,7 @@ else
   (((2 # 1) * (1 - winnerShare)) * T)%Q
 .
 
+(* Wald's SPRT risk-limiting audit procedure *)
 Fixpoint do_audit_inc' total_votes votes T margin risk : Comp bool :=
 match total_votes with 
 | O => full_count_audit votes risk margin
@@ -252,7 +259,7 @@ match total_votes with
          end)
 end.
 
-(*an audit returns true if the election result is likely correct, and false otherwise*)
+(* An audit returns true if the election result is likely correct, and false otherwise *)
 Fixpoint do_audit_inc_rat' T n total_votes actual_margin reported_margin risk : Comp bool :=
 match total_votes with 
 | O => ret false
@@ -264,6 +271,7 @@ match total_votes with
           do_audit_inc_rat' T' (S n) total_votes' actual_margin reported_margin risk
 end.
 
+(* Initialize the audit with test statistic T=1 and ballots sampled m=0 *)
 Definition do_audit_inc_rat total_votes actual_margin reported_margin risk : Comp bool :=
 do_audit_inc_rat' 1 0 total_votes actual_margin reported_margin risk .
 
@@ -505,6 +513,11 @@ try rewrite nat_compare_eq_iff in *; try omega; auto.
    + reflexivity. 
 Qed. 
 
+(* The audit wins: 
+ - trivially if there are no votes
+ - if the reported winner is the actual winner
+ - if the audit catches a misreported margin
+*)
 Definition win_game (audit : list (option bool) -> Q -> Q -> Comp bool)
            (actual_votes : list nat) (reported_winner : nat)
            (reported_loser : nat) (reported_margin : Q) risk  :=
@@ -521,7 +534,7 @@ Definition win_game (audit : list (option bool) -> Q -> Q -> Comp bool)
 .
 
 
-
+(* An audit is valid if Pr[audit_loses] < risk *)
 Definition valid_audit audit := 
 forall actual_votes reported_winner
        reported_loser reported_margin risk,
@@ -530,7 +543,7 @@ forall actual_votes reported_winner
                       reported_loser (Rat_to_Q risk)
                       reported_margin]).
 
-
+(* A full-count audit is always valid *)
 Lemma valid_full_count : 
   valid_audit full_count_audit.
 Proof.
@@ -796,7 +809,8 @@ Theorem evalDist_right_ident : forall (A : Set)(eqd : EqDec A)(c : Comp A) a,
   trivial.
 Qed.
 
-
+(* Main result *)
+(* Our implementation of Wald's SPRT audit is valid *)
 Lemma valid_ballot_poll_inc :
   valid_audit do_audit_inc.
 Proof.
