@@ -1,4 +1,4 @@
-Add Rec LoadPath "fcf/src".
+Add Rec LoadPath "fcf/src/FCF".
 Require Import QArith_base.
 Require Import ballotPollAudit.
 
@@ -103,6 +103,7 @@ induction votes; intros.
        simpl in *. inversion H0; auto.
        unfold nat_to_rat.
        reflexivity.
+
 - simpl in *. rewrite sumList_app.  
   destruct a eqn:?.
   + 
@@ -562,6 +563,13 @@ Proof.
   dist_compute.
 Qed.
 
+Lemma not_true_length : forall l,
+~In true l -> length (filter (fun b => b) l) = 0.
+intros.
+induction l. auto.
+simpl in *. destruct a. simpl in *. intuition.
+intuition.
+Qed.
 
 Lemma length_filter_true_bool :
 forall l,
@@ -572,15 +580,6 @@ induction l. simpl. auto.
 simpl. destruct a. simpl. inversion H.
 intuition.
 subst. 
-
-Lemma not_true_length : forall l,
-~In true l -> length (filter (fun b => b) l) = 0.
-intros.
-induction l. auto.
-simpl in *. destruct a. simpl in *. intuition.
-intuition.
-Qed.
-
 rewrite not_true_length. auto. auto.
 inversion H. auto.
 Qed.
@@ -611,6 +610,28 @@ Qed.
 (*Lemma sumlist_support_superSet :*)
 
 
+Lemma of_nat_posnat : 
+forall (p: posnat), Z.of_nat p = Zpos (posnat_to_pos p).
+Proof.
+intros.
+destruct p. simpl. unfold Z.of_nat. destruct x; try omega.
+f_equal. apply Pos.of_nat_succ.
+Qed.
+
+Lemma le_Q_Rat :
+forall r s, 
+Qle_bool (Rat_to_Q r) (Rat_to_Q s) =true -> leRat r s.
+Proof.
+intros.
+destruct r. destruct s. simpl in *.
+unfold Qle_bool in H. simpl in *. unfold leRat, bleRat. simpl.
+if_match_tac; auto. exfalso. 
+clear Heqs.
+apply inj_gt in g.
+repeat rewrite Nat2Z.inj_mul in g.
+repeat rewrite of_nat_posnat in g. rewrite <-Zle_is_le_bool in H.
+omega.
+Qed.
 
 Lemma valid_ballot_poll_inc_rat :
   valid_audit_prob_only do_audit_inc_rat.
@@ -674,29 +695,6 @@ Check sumList_all.
 *)
 
 
-Lemma le_Q_Rat :
-forall r s, 
-Qle_bool (Rat_to_Q r) (Rat_to_Q s) =true -> leRat r s.
-Proof.
-intros.
-destruct r. destruct s. simpl in *.
-unfold Qle_bool in H. simpl in *. unfold leRat, bleRat. simpl.
-if_match_tac; auto. exfalso. SearchAbout Z.of_nat. 
-clear Heqs.
-apply inj_gt in g.
-repeat rewrite Nat2Z.inj_mul in g.
-
-Lemma of_nat_posnat : 
-forall (p: posnat), Z.of_nat p = Zpos (posnat_to_pos p).
-Proof.
-intros.
-destruct p. simpl. unfold Z.of_nat. destruct x; try omega.
-f_equal. apply Pos.of_nat_succ.
-Qed.
-
-repeat rewrite of_nat_posnat in g. rewrite <-Zle_is_le_bool in H.
-omega.
-Qed.
 
 assert ( (1 # 2) = (Rat_to_Q (RatIntro 1 (pos 2)))) by auto. 
 (*rewrite H in Heqb.
@@ -725,7 +723,10 @@ inversion H3.
 subst. simpl. destruct a. simpl. 
  
       destruct a. simpl.
+
       SearchAbout (Rat -> Prop).*)
+Admitted.
+
 Lemma getSupport_bernoulli : forall r, 
 ~ r == 1%rat ->
 ~ r == 0%rat ->
@@ -738,16 +739,16 @@ unfold bvToNat. simpl. clear - Heqn0 g. exfalso.
 induction x. omega.
 unfold lognat in *. simpl in *.
 unfold lognat in *.  
-Check Pos.size_nat. Print Pos.size_nat.
+(*Check Pos.size_nat. Print Pos.size_nat.*)
 - simpl. unfold getAllBvectors.
-SearchAbout getSupport.
+(*SearchAbout getSupport.
       Print Support. 
       Print evalDist.
 
 Print bind_eq_dec.
-Print Bind.
+Print Bind.*)
       simpl.
-      Check sumList_all.
+(*      Check sumList_all.*)
       (*rewrite sumList_exactly_one.
       
       
@@ -760,6 +761,8 @@ Print Proper.
        (Rat_toQ risk)) true) at 1. 
 Check evalDist_right_ident.
 *)
+Admitted.
+
 Theorem evalDist_right_ident : forall (A : Set)(eqd : EqDec A)(c : Comp A) a,
   evalDist (x <-$ c; ret x) a == evalDist c a.
 
