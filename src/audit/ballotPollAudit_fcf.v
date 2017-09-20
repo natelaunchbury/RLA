@@ -228,6 +228,7 @@ match nat_compare a b with
 | _ => false
 end.
 
+(* An audit where you count every vote *)
 Definition full_count_audit (votes : list (option bool)) (_ : Q) (_ : Q) :=
 let (rep_winner_count, rep_loser_count) := tabulate votes in
 if (gtb rep_winner_count rep_loser_count) then
@@ -235,13 +236,19 @@ if (gtb rep_winner_count rep_loser_count) then
 else
     ret false.
 
-
+(*  T = (2*s_w)^{m_w} * (2 - 2*s_w)^{m_l}  *)
 Definition update_T (vote : bool) (T : Q) (winnerShare : Q) :=
 if vote then
   (((2 # 1) * winnerShare) * T)%Q
 else
   (((2 # 1) * (1 - winnerShare)) * T)%Q
 .
+(* Note: it has been proposed that this bound can be reduced
+ to the Chebyshev's inequality. Proving this first in FCF
+ may be a good step forward. 
+
+Chebyshev inequality: Pr[ |X-u| >= ks] <= 1/(k^2) 
+*)
 
 (* Wald's SPRT risk-limiting audit procedure *)
 Fixpoint do_audit_inc' total_votes votes T margin risk : Comp bool :=

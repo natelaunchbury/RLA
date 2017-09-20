@@ -113,10 +113,6 @@ split_after_index l n.
 
 Local Open Scope Q.
 
-Definition waldFactor (winvotes losevotes : positive) (winAudited loseAudited : Z) :=
-let waldFactor := Zpos (winvotes) # (winvotes + losevotes) in
-Qred (Qinv ((Qpower ((2 # 1) * waldFactor) winAudited) * 
-      (Qpower ((2 # 1) * (1 - (waldFactor))) loseAudited))).
 
 
 (*Definition contests := ([[5050; 4050]; [3000; 7000]]%N).
@@ -131,7 +127,7 @@ match n with
 | Npos p => Qpower_positive q p
 end.
 
-
+(* Test statistic  T = (2*s_w)^{m_w} * (2 - 2*s_w)^{m_l}  *)
 Definition auditRisk (votesWinner : N) (votesLoser : N) (winnerShare : Q) : Q :=
 (Qinv ((Qpower_N ((2 # 1) * winnerShare) votesWinner) * (Qpower_N ((2 # 1) * (1 - winnerShare)) votesLoser))).
 
@@ -140,7 +136,7 @@ Definition auditRisk (votesWinner : N) (votesLoser : N) (winnerShare : Q) : Q :=
 Definition Qlt_bool a b := negb (Qle_bool b a).  
 
 
-
+(* The audit is done when T < risk *)
 Definition auditDone (votesWinner : N) (votesLoser : N) (winnerShare : Q) (risk : Q) : bool :=
 Qlt_bool (auditRisk votesWinner votesLoser winnerShare) risk.
 
