@@ -244,7 +244,7 @@ else
   (((2 # 1) * (1 - winnerShare)) * T)%Q
 .
 
-(* UPDATE: back-of-the-napkin calculations has given evidence
+(* UPDATE: back-of-the-napkin calculations have given evidence
 that the note below might not actually be valuable.
 
  Note: it has been proposed that this bound can be reduced
@@ -775,8 +775,7 @@ Print Bind.*)
 (*      Check sumList_all.*)
       (*rewrite sumList_exactly_one.
       
-      
-
+   
       SearchAbout evalDist.
 simpl. unfold get_random_ballot_ratio at 1. unfold Bernoulli. destruct actual_margin.
 Set Printing All.
